@@ -1,0 +1,15 @@
+.characterImageContainer {
+    width: 100%;
+    max-width: 300px; /* Limita el ancho en pantallas grandes */
+    height: auto;    /* La altura se ajusta automáticamente */
+    max-height: 400px;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.characterImage {
+    width: 100%;
+    height: auto; /* La altura se ajusta automáticamente */
+    object-fit: cover;
+    display: block;
+}

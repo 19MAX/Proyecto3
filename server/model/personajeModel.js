@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const personajeSchema = new mongoose.Schema(
   {
+    imagen : {
+        type: String,
+        required: false
+    },
     nombre: {
         type: String,
         required: true
