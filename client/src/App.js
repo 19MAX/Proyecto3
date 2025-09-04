@@ -1,49 +1,52 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import api from "./services/api.js"; // Importar la configuración de axios
 import CharacterList from "./components/CharacterList/CharacterList";
 import CharacterDetails from "./components/CharacterDetails/CharacterDetails";
-import EditCharacterForm from './components/EditCharacterForm/EditCharacterForm';
-import SearchComponent from './components/SearchComponent/SearchComponent';
-import { DeleteConfirmationModal, AddSuccessModal } from './components/modals/Modals';
-
-// Datos de ejemplo
-const initialCharacters = [
-  { id: 1, name: 'Goku', race: 'Saiyan', power: 9001, transformation: 'Super Saiyan', description: 'Goku es el protagonista principal de la serie. Es un guerrero de la raza Saiyan con un corazón puro y un deseo insaciable de volverse más fuerte para proteger la Tierra.', image: 'https://i.blogs.es/04ac6a/2560_3000/1366_2000.jpeg' },
-  { id: 2, name: 'Vegeta', race: 'Saiyan', power: 8500, transformation: 'Super Saiyan Blue', description: 'Vegeta es el príncipe de la raza Saiyan y el eterno rival de Goku. Su orgullo y determinación lo han impulsado a superar sus límites.', image: 'https://i.blogs.es/04ac6a/2560_3000/1366_2000.jpeg' },
-  { id: 3, name: 'Gohan', race: 'Half-Saiyan', power: 7000, transformation: 'Ultimate Gohan', description: 'Gohan es el hijo mayor de Goku y un talentoso guerrero con un potencial oculto que supera a su padre. A lo largo de la historia, evoluciona de un niño asustadizo a un poderoso protector.', image: 'https://i.blogs.es/04ac6a/2560_3000/1366_2000.jpeg' },
-];
+import EditCharacterForm from "./components/EditCharacterForm/EditCharacterForm";
+import CreateCharacterForm from "./components/CreateCharacterForm/CreateCharacterForm"; // Nuevo componente
+import {
+  DeleteConfirmationModal,
+  AddSuccessModal,
+} from "./components/modals/Modals";
+import { Button } from "react-bootstrap";
 
 const App = () => {
-  const [characters, setCharacters] = useState(initialCharacters);
-  const [view, setView] = useState('home');
+  const [characters, setCharacters] = useState([]);
+  const [view, setView] = useState("home");
   const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [characterToDelete, setCharacterToDelete] = useState(null);
   const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [editFormData, setEditFormData] = useState({
-    name: '',
-    race: '',
-    power: '',
-    transformation: '',
-  });
+  // Cargar personajes al iniciar
+  useEffect(() => {
+    fetchCharacters();
+  }, []);
+
+  const fetchCharacters = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/personajes");
+      setCharacters(response.data.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching characters:", err);
+      // setError('Error al cargar los personajes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleViewMore = (character) => {
     setSelectedCharacter(character);
-    setView('details');
+    setView("details");
   };
 
   const handleEdit = (character) => {
     setSelectedCharacter(character);
-    setEditFormData({
-      name: character.name,
-      race: character.race,
-      power: character.power,
-      transformation: character.transformation,
-    });
-    setView('edit');
+    setView("edit");
   };
 
   const handleDelete = (character) => {
@@ -51,73 +54,84 @@ const App = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setCharacters(prevCharacters => prevCharacters.filter(char => char.id !== characterToDelete.id));
-    setShowDeleteModal(false);
-    setCharacterToDelete(null);
-  };
-
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData(prevData => ({ ...prevData, [name]: value }));
-  };
-
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    setCharacters(prevCharacters => prevCharacters.map(char =>
-      char.id === selectedCharacter.id ? { ...char, ...editFormData } : char
-    ));
-    setView('home');
-    setSelectedCharacter(null);
-  };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      setView('search');
-      return;
-    }
+  const confirmDelete = async () => {
     try {
-      const response = await axios.get(`https://dragonball-api.com/api/characters?name=${encodeURIComponent(searchQuery)}`);
-      setSearchResults(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setSearchResults([]);
+      await api.delete(`/personajes/eliminar/${characterToDelete._id}`);
+      setCharacters((prevCharacters) =>
+        prevCharacters.filter((char) => char._id !== characterToDelete._id)
+      );
+      setShowDeleteModal(false);
+      setCharacterToDelete(null);
+    } catch (err) {
+      console.error("Error deleting character:", err);
+      setError("Error al eliminar el personaje");
     }
-    setView('search');
   };
 
-  const handleAddCharacter = (newCharacter) => {
-    const existingCharacter = characters.find(char => char.name === newCharacter.name);
-    if (existingCharacter) {
-      setShowAddSuccessModal(true);
-      return;
-    }
-    
-    let updatedCharacters;
-    if (characters.length >= 3) {
-      updatedCharacters = [...characters.slice(0, 2), { ...newCharacter, id: Date.now() }];
-    } else {
-      updatedCharacters = [...characters, { ...newCharacter, id: Date.now() }];
-    }
+  const handleEditSubmit = async (formData) => {
+    try {
+      const response = await api.put(
+        `/personajes/editar/${selectedCharacter._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    setCharacters(updatedCharacters);
-    setView('home');
-    setSearchResults([]);
-    setShowAddSuccessModal(true);
+      setCharacters((prevCharacters) =>
+        prevCharacters.map((char) =>
+          char._id === selectedCharacter._id ? response.data.data : char
+        )
+      );
+      setView("home");
+      setSelectedCharacter(null);
+    } catch (err) {
+      console.error("Error updating character:", err);
+      setError("Error al actualizar el personaje");
+    }
+  };
+
+  const handleCreateCharacter = async (formData) => {
+    try {
+      const response = await api.post("/personajes/crear", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setCharacters((prevCharacters) => [
+        ...prevCharacters,
+        response.data.data,
+      ]);
+      setView("home");
+      setShowAddSuccessModal(true);
+    } catch (err) {
+      console.error("Error creating character:", err);
+      setError("Error al crear el personaje");
+    }
   };
 
   const renderContent = () => {
+    if (loading) {
+      return <div className="text-center text-light">Cargando...</div>;
+    }
+
+    if (error) {
+      return <div className="text-center text-danger">{error}</div>;
+    }
+
     switch (view) {
-      case 'home':
+      case "home":
         return (
           <>
-            <SearchComponent
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              handleSearch={handleSearch}
-            />
+            <div className="d-flex justify-content-center">
+              <Button variant="light" onClick={() => setView("create")}>
+                <i className="fa-solid fa-plus me-2"></i>
+                Crear Personaje
+              </Button>
+            </div>
             <CharacterList
               characters={characters}
               handleViewMore={handleViewMore}
@@ -126,30 +140,24 @@ const App = () => {
             />
           </>
         );
-      case 'search':
+      case "create":
         return (
-          <SearchComponent
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            handleSearch={handleSearch}
-            searchResults={searchResults}
-            handleAddCharacter={handleAddCharacter}
+          <CreateCharacterForm
+            handleCreateCharacter={handleCreateCharacter}
             setView={setView}
           />
         );
-      case 'details':
+      case "details":
         return (
           <CharacterDetails
             selectedCharacter={selectedCharacter}
             setView={setView}
           />
         );
-      case 'edit':
+      case "edit":
         return (
           <EditCharacterForm
             selectedCharacter={selectedCharacter}
-            editFormData={editFormData}
-            handleEditFormChange={handleEditFormChange}
             handleEditSubmit={handleEditSubmit}
             setView={setView}
           />
@@ -160,18 +168,19 @@ const App = () => {
   };
 
   return (
-    <div className="App min-vh-100 text-light d-flex flex-column align-items-center" style={{padding: '20px'}}>
-      
-      <div className="container py-4">
-        <h1 className="text-center mb-4 fw-bold" style={{ color: 'orange' }}>Dragon Ball Universe</h1>
-        {renderContent()}
-      </div>
+    <div className="container-fluid min-vh-100">
+        <h1 className="text-center mb-4 fw-bold" style={{ color: "orange" }}>
+          Dragon Ball X
+        </h1>
+      <div className="">{renderContent()}</div>
+
       <DeleteConfirmationModal
         show={showDeleteModal}
         handleClose={() => setShowDeleteModal(false)}
         handleConfirm={confirmDelete}
-        characterName={characterToDelete?.name}
+        characterName={characterToDelete?.nombre}
       />
+
       <AddSuccessModal
         show={showAddSuccessModal}
         handleClose={() => setShowAddSuccessModal(false)}

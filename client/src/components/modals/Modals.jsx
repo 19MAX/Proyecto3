@@ -3,12 +3,12 @@ import { Modal, Button } from 'react-bootstrap';
 
 export const DeleteConfirmationModal = ({ show, handleClose, handleConfirm, characterName }) => (
   <Modal show={show} onHide={handleClose} centered>
-    <Modal.Header closeButton className="bg-warning text-danger">
+    <Modal.Header closeButton >
       <Modal.Title>Confirmar eliminación</Modal.Title>
     </Modal.Header>
-    <Modal.Body className="bg-warning text-danger">¿Estás seguro de que deseas eliminar a **{characterName}**?</Modal.Body>
-    <Modal.Footer className="bg-warning text-danger">
-      <Button variant="primary" onClick={handleClose}>
+    <Modal.Body className="text-danger"><h4>¿Estás seguro de que deseas eliminar a : {characterName}?</h4></Modal.Body>
+    <Modal.Footer className="bg-light text-danger">
+      <Button variant="secondary" onClick={handleClose}>
         Cancelar
       </Button>
       <Button variant="danger" onClick={handleConfirm}>
@@ -20,14 +20,14 @@ export const DeleteConfirmationModal = ({ show, handleClose, handleConfirm, char
 
 export const AddSuccessModal = ({ show, handleClose }) => (
   <Modal show={show} onHide={handleClose} centered>
-    <Modal.Header closeButton className="bg-primary text-light">
+    <Modal.Header closeButton className="bg-success text-light">
       <Modal.Title>Éxito</Modal.Title>
     </Modal.Header>
-    <Modal.Body className="bg-primary text-light">
-      El personaje se agregó exitosamente a la pantalla de inicio.
+    <Modal.Body className="bg-success text-light">
+      <h4>El personaje se agregó exitosamente a la pantalla de inicio.</h4>
     </Modal.Body>
-    <Modal.Footer className="bg-primary text-light">
-      <Button variant="success" onClick={handleClose}>
+    <Modal.Footer className="bg-success text-light">
+      <Button variant="secondary" onClick={handleClose}>
         Cerrar
       </Button>
     </Modal.Footer>
