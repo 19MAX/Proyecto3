@@ -3,6 +3,3 @@ node_modules
 
 #Archivos de entorno
 .env
-
-#Imágenes de personajes
-server/assets/images/personajes*

@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Oxygen', sans-serif;
+}
+
+body {
+    background: linear-gradient(10deg, #036564,#002e34, #45936c);
+}
