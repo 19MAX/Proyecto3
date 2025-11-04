@@ -57,3 +57,14 @@ REACT_APP_API_URL=http://localhost:300/api
 # Iniciar frontend
 //npm run start
 ```
+## 🤝 Colaboración y Contribución
+
+Este proyecto fue desarrollado en colaboración con el usuario [https://github.com/AngelSoriano89] como parte de un [Bootcamp].
+
+## 📌 Topics (Etiquetas de GitHub)
+
+`html` `css` `javascript` `responsive-design` `landing-page` `maquetacion` `frontend`
+
+---
+
+* 
