@@ -2,6 +2,8 @@
 Frontend que gestiona la interface de drago ball
 Backend que gestiona la lógica del sistema
 
+![Screenshot (20250905-113923)](https://github.com/user-attachments/assets/a65dd185-7a10-436b-96ba-ad70b38f1220)
+
 ## Crear base de datos
 Lee el archivo readme dentro de server/
 
